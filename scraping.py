@@ -8,8 +8,9 @@ import time
 from pytz import timezone
 tz = timezone('Canada/Eastern')
 # print(pytz.all_timezones)
-import sys
-sys.path.insert(0, r'C:\Users\swapn\proline\chromedriver.exe')
+# import sys
+# sys.path.insert(0, r'C:\Users\swapn\proline\chromedriver.exe')
+import chromedriver_autoinstaller as chromedriver
 
          
 chrome_options = webdriver.ChromeOptions()
@@ -66,7 +67,7 @@ def utcnow():
 start_time = time.time()
 utc = utcnow()
 
-driver = webdriver.Chrome('chromedriver', options=chrome_options)
+driver = webdriver.Chrome(chromedriver.install(), options=chrome_options)
 driver.implicitly_wait(20)
 driver.get(PROLINE_URL)
 
