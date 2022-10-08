@@ -4,6 +4,8 @@ import unicodedata
 from DriverUtility import DriverUtility
 import time
 from tqdm import tqdm
+import re
+
 
 class DrankPage(DriverUtility):
     
@@ -37,8 +39,19 @@ class RankingDetails:
         visitor_teams = match_info_dict['Visitor Team']
 
         for h_team, v_team in tqdm(zip(home_teams, visitor_teams)):
-            h_rank = int(rank_detail.get_team_rank(ranking_table, h_team))
-            v_rank = int(rank_detail.get_team_rank(ranking_table, v_team))
+            if "(" in h_team:
+                h_team = re.sub(' +', ' ', re.sub("\(.*?\)","", h_team)) # 1st sub removes extra space created by 2nd sub between words
+            if "(" in v_team:
+                v_team = re.sub(' +', ' ', re.sub("\(.*?\)","",v_team))
+            try:
+                h_rank = int(rank_detail.get_team_rank(ranking_table, h_team))
+            except:
+                #if rank is not found assign it with default big value
+                h_rank = 9999
+            try:
+                v_rank = int(rank_detail.get_team_rank(ranking_table, v_team))
+            except:
+                v_rank = 9999
             self.home_rank.append(h_rank)
             self.visitor_rank.append(v_rank)
             if h_rank > v_rank:
@@ -48,7 +61,7 @@ class RankingDetails:
             team_rank_diff = abs(v_rank-h_rank)
             if team_rank_diff < 4:
                 rank_diff_summary = ","+"T"*(4-team_rank_diff)
-            elif (team_rank_diff == 10) and (team_rank_diff < 15):
+            elif (team_rank_diff >= 10) and (team_rank_diff < 15):
                 rank_diff_summary = "+"
             elif (team_rank_diff >= 15) and (team_rank_diff < 20):
                 rank_diff_summary = "++"
@@ -61,8 +74,8 @@ class RankingDetails:
         # close drank tab 
         self.driver.close()  
         rank_info_dict = {
-                "Visitor Team Rank": self.visitor_rank,
-                "Home Team Rank": self.home_rank,
-                "Ranking Summary": self.rank_summary 
+                "V Rank": self.visitor_rank,
+                "H Rank": self.home_rank,
+                "Rank": self.rank_summary 
             }
         return rank_info_dict
