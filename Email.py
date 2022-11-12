@@ -8,7 +8,7 @@ class Email:
     def add_attachment(self, file_path):
         with open(file_path,"rb") as f:
             data = f.read()
-            file_name = f.name
+            file_name = (f.name).split("/")[-1]
             self.msg.add_attachment(data, maintype="application", subtype="xlsx", filename=file_name)
           
     def send_email(self, subject, user_name, to, password, file_path, content=None):

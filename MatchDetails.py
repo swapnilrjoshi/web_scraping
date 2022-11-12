@@ -288,7 +288,7 @@ class MatchDetails:
         # iterate over each match to read team names, match timing and 
         # individual match link for runline info collection
         match_page = MatchPage(self.driver)
-        for match in tqdm(matches):
+        for match in matches:
             match_date_time = home_page.get_match_date_time(match)
             teams = home_page.get_team_names(match)
             match_link = home_page.get_match_link(match)

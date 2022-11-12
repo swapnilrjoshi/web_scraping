@@ -38,7 +38,7 @@ class RankingDetails:
         home_teams = match_info_dict['Home Team']
         visitor_teams = match_info_dict['Visitor Team']
 
-        for h_team, v_team in tqdm(zip(home_teams, visitor_teams)):
+        for h_team, v_team in zip(home_teams, visitor_teams):
             if "(" in h_team:
                 h_team = re.sub(' +', ' ', re.sub("\(.*?\)","", h_team)) # 1st sub removes extra space created by 2nd sub between words
             if "(" in v_team:

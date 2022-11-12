@@ -14,7 +14,7 @@ import numpy as np
         
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument('--start-maximized')
-# chrome_options.add_argument('--headless')
+chrome_options.add_argument('--headless')
 chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument("--log-level=3")
 chrome_options.add_argument("--window-size=1920,1080")
@@ -32,11 +32,12 @@ start_time = time.time()
 utc = utcnow()
 # Save file with datetime stamp
 dt =  utc.strftime("%Y_%m_%d_%H_%M_%S")
-filename = "list_for_"+ dt +".xlsx"
+print("\nRun for :", dt)
+filename = "/home/ec2-user/olg/output_files/list_for_"+ dt +".xlsx"
 
 sports = [("Baseball", "MLB", DRATING_MLB_URL), ("Football", "NFL", DRATING_NFL_URL), ("Football","NCAA Football", DRATING_NCAA_URL)]
 df_dict = {}
-# sports = [("Baseball", "MLB", DRATING_MLB_URL), ("Football", "NFL", DRATING_NFL_URL)]
+#sports = [("Baseball", "MLB", DRATING_MLB_URL)]
 for i, league in enumerate(sports):
     try:
         driver = webdriver.Chrome(chromedriver.install(), options=chrome_options)
@@ -77,20 +78,19 @@ for i,(league, info) in enumerate(df_dict.items()):
         writer.save()
         writer.close()
 
-exit()
 print("Sending an Email")
 email = Email()
-with open('PASSWD.txt','r') as f:
-    PASSWD = f.read() 
+with open('/home/ec2-user/olg/web_scraping/PASSWD.txt','r') as f:
+    PASSWD = (f.read()).rstrip()
     
-# with open('EMAILTO.txt','r') as f:
-#     TO = f.read() 
+with open('/home/ec2-user/olg/web_scraping/EMAILTO.txt','r') as f:
+    TO = (f.read()).rstrip()
+
 dt =  utc.strftime("%d %b %Y, %H:%M")
 subject = "List for " + dt
 user_name = "swapnilrajjoshi@gmail.com"
-TO = "swapnilrajjoshi@gmail.com"
+#TO = "swapnilrajjoshi@gmail.com"
 
-# password = "bafymrkazmkwityx"
 file_path = filename
 email.send_email(subject, user_name, TO, PASSWD, file_path)
 
