@@ -42,7 +42,12 @@ class RankingDetails:
         time.sleep(5)
         drating_soup = BeautifulSoup(self.driver.page_source, "html.parser")
         ranking_table = drating_soup.find('tbody', class_='table-body')
-
+        
+        # Creating a list of all teams in ranking table in that order
+        self.team_rank_list = []
+        for r in ranking_table.findAll('a'):
+            self.team_rank_list.append(r.string)
+            
         home_teams = match_info_dict['Home Team']
         visitor_teams = match_info_dict['Visitor Team']
 
