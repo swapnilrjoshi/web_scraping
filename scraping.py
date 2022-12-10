@@ -11,6 +11,7 @@ import chromedriver_autoinstaller as chromedriver
 import pandas as pd
 from openpyxl import load_workbook
 import numpy as np
+import os
         
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument('--start-maximized')
@@ -35,15 +36,17 @@ start_time = time.time()
 utc = utcnow()
 # Save file with datetime stamp
 dt =  utc.strftime("%Y_%m_%d_%H_%M_%S")
+dt_list = dt.split("_")
 print("\nRun for :", dt)
-filename = "/home/ec2-user/olg/output_files/list_for_"+ dt +".xlsx"
-
+#filename = "/home/ec2-user/olg/output_files/list_for_"+ dt +".xlsx"
+filename = os.path.join("/home/ec2-user/olg/output_files/",dt_list[0],dt_list[1],"list_for_"+ dt +".xlsx")
+os.makedirs(os.path.dirname(filename), exist_ok=True)
 #sports = [("Baseball", "MLB", DRATING_MLB_URL), ("Football", "NFL", DRATING_NFL_URL), ("Football","NCAA Football", DRATING_NCAA_URL)]
 sports = [("Football", "NFL", DRATING_NFL_URL), ("Football","NCAA Football", DRATING_NCAA_URL), 
           ("Basketball","NCAA Basketball", DRATING_NCAA_B_URL), 
           ("Basketball","NBA", DRATING_NBA_URL), ("Hockey", "NHL", DRATING_NHL_URL)]
 df_dict = {}
-
+#sports = [("Football", "NFL", DRATING_NFL_URL)]
 for i, league in enumerate(sports):
     try:
         driver = webdriver.Chrome(chromedriver.install(), options=chrome_options)
