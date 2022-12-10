@@ -5,7 +5,8 @@ from DriverUtility import DriverUtility
 import time
 from tqdm import tqdm
 import re
-
+from fuzzywuzzy import process
+from fuzzywuzzy import fuzz
 
 class DrankPage(DriverUtility):
     
@@ -17,8 +18,8 @@ class DrankPage(DriverUtility):
     def load_drank_page(self):
         super().get_locator(By.CSS_SELECTOR, self.ranking_table_css_selector)
         
-    def get_team_rank(self, table, team_name):
-        return unicodedata.normalize("NFKD", table.find('a', string=team_name).parent.get_text(strip=True)).strip().split('.')[0]
+#    def get_team_rank(self, table, team_name):
+#        return unicodedata.normalize("NFKD", table.find('a', string=team_name).parent.get_text(strip=True)).strip().split('.')[0]
         
 
 class RankingDetails:
@@ -27,6 +28,13 @@ class RankingDetails:
         self.home_rank = []
         self.visitor_rank = []
         self.rank_summary = []
+        
+    def get_team_rank(self, team_name):
+        table_team_name = process.extractOne(team_name, self.team_rank_list, scorer=fuzz.token_sort_ratio, score_cutoff = 70)
+        if not table_team_name:
+            return 9999
+        else:
+            return self.team_rank_list.index(table_team_name[0])+1
     
     def get_team_ranks(self, match_info_dict):
         rank_detail = DrankPage(self.driver)
@@ -43,15 +51,17 @@ class RankingDetails:
                 h_team = re.sub(' +', ' ', re.sub("\(.*?\)","", h_team)) # 1st sub removes extra space created by 2nd sub between words
             if "(" in v_team:
                 v_team = re.sub(' +', ' ', re.sub("\(.*?\)","",v_team))
-            try:
-                h_rank = int(rank_detail.get_team_rank(ranking_table, h_team))
-            except:
-                #if rank is not found assign it with default big value
-                h_rank = 9999
-            try:
-                v_rank = int(rank_detail.get_team_rank(ranking_table, v_team))
-            except:
-                v_rank = 9999
+#            try:
+#                h_rank = int(rank_detail.get_team_rank(ranking_table, h_team))
+#            except:
+#                #if rank is not found assign it with default big value
+#                h_rank = 9999
+#            try:
+#                v_rank = int(rank_detail.get_team_rank(ranking_table, v_team))
+#            except:
+#                v_rank = 9999
+            h_rank = int(self.get_team_rank(h_team))
+            v_rank = int(self.get_team_rank(v_team))
             self.home_rank.append(h_rank)
             self.visitor_rank.append(v_rank)
             if h_rank > v_rank:

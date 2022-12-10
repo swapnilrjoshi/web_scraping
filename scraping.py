@@ -23,6 +23,9 @@ PROLINE_URL = "https://proline.olg.ca/en-ca/"
 DRATING_MLB_URL = "https://www.dratings.com/sports/mlb-baseball-ratings/"
 DRATING_NFL_URL = "https://www.dratings.com/sports/nfl-football-ratings/"
 DRATING_NCAA_URL = "https://www.dratings.com/sports/ncaa-fbs-football-ratings/"
+DRATING_NCAA_B_URL = "https://www.dratings.com/sports/ncaa-college-basketball-ratings/"
+DRATING_NBA_URL = "https://www.dratings.com/sports/nba-basketball-ratings/"
+DRATING_NHL_URL = "https://www.dratings.com/sports/nhl-hockey-ratings/"
 
 def utcnow():
     return datetime.datetime.now(tz=tz)
@@ -35,14 +38,20 @@ dt =  utc.strftime("%Y_%m_%d_%H_%M_%S")
 print("\nRun for :", dt)
 filename = "/home/ec2-user/olg/output_files/list_for_"+ dt +".xlsx"
 
-sports = [("Baseball", "MLB", DRATING_MLB_URL), ("Football", "NFL", DRATING_NFL_URL), ("Football","NCAA Football", DRATING_NCAA_URL)]
+#sports = [("Baseball", "MLB", DRATING_MLB_URL), ("Football", "NFL", DRATING_NFL_URL), ("Football","NCAA Football", DRATING_NCAA_URL)]
+sports = [("Football", "NFL", DRATING_NFL_URL), ("Football","NCAA Football", DRATING_NCAA_URL), 
+          ("Basketball","NCAA Basketball", DRATING_NCAA_B_URL), 
+          ("Basketball","NBA", DRATING_NBA_URL), ("Hockey", "NHL", DRATING_NHL_URL)]
 df_dict = {}
-#sports = [("Baseball", "MLB", DRATING_MLB_URL)]
+
 for i, league in enumerate(sports):
     try:
         driver = webdriver.Chrome(chromedriver.install(), options=chrome_options)
         driver.implicitly_wait(20)
         driver.get(PROLINE_URL)
+        time.sleep(10)
+        # Hockey is at the end of the page. Need scrolling
+        driver.execute_script("window.scrollTo(0,300)")
         print("Getting Match Details of {}".format(league[1]))
         match_detail = MatchDetails(driver,league[0], "USA", league[1])
         match_info_dict = match_detail.get_match_details()

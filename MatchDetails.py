@@ -18,23 +18,21 @@ class HomePage(DriverUtility):
         self.team_name_class = "fdjgs-event-details"
         self.match_link_class = "fdjgs-market-counter"
         self.match_date_class = "fdjgs-event-time"
-#         self.maches_section_xpath = '//*[@id="fdjgs-widget-competition"]/div/div/div[2]/div[2]/section'
+
         
     def load_matches_page(self, sport, country, league):
         main_menu_css_selector = "div.fdjgs-sport[data-sport='"+sport+"']"
       # submenu_css_selector = "li.fdjgs-item[aria-label*='"+country+"']"
         submenu_css_selector = "li.fdjgs-item[aria-label*='"+country+"'][aria-label$='"+sport+".']"
-#         submenu2_link_text = league
         submenu2_link_text = "div.fdjgs-item-description>a[aria-label*='"+ league +".']"
         main_menu = super().get_locator(By.CSS_SELECTOR, main_menu_css_selector)
         super().perform_actions(main_menu)
         submenu = super().get_locator(By.CSS_SELECTOR, submenu_css_selector)
         super().perform_actions(submenu)
-        time.sleep(2)
-#         submenu2 = super().get_locator(By.LINK_TEXT, submenu2_link_text)
+#        time.sleep(2)
         submenu2 = super().get_locator(By.CSS_SELECTOR, submenu2_link_text)
         super().perform_actions(submenu2)
-        time.sleep(2)
+        time.sleep(4)
         super().get_locator(By.ID, self.matches_menu_id)
         
     def get_team_names(self, match_info):
@@ -75,16 +73,6 @@ class MatchPage(DriverUtility):
           "h_runline_po":home_runline_odds
           }
         return runline_dict
-
-    # def get_runline_3way_info(self, all_stats):
-    #   runline_3way_stats = all_stats.find("span", class_="fdjgs-market-description", string="Runline 3-Way").parent.parent
-    #   runline_3way_draw = runline_3way_stats.find("span", class_="fdjgs-description", string=lambda text: "Draw" in text)
-    #   draw_str = runline_3way_draw.string
-    #   runline_3_way_dict = {
-    #       "runline_3way": re.findall('\((.*?)\)', draw_str)[0].strip(),
-    #       "runline_3way_po": runline_3way_draw.next_sibling.string.strip()
-    #   }
-    #   return runline_3_way_dict
         
     def get_moneyline_info(self, all_stats):
         moneyline_stats = all_stats.find("span", class_="fdjgs-market-description", string="Moneyline").parent.parent
@@ -105,8 +93,8 @@ class MatchPage(DriverUtility):
               }
         return moneyline_dict
 
-    def get_ps_info(self, all_stats, v_team, h_team):
-        ps_stats = all_stats.find("span", class_="fdjgs-market-description", string="Point Spread").parent.parent
+    def get_ps_info(self, all_stats, v_team, h_team, search_str="Point Spread"):
+        ps_stats = all_stats.find("span", class_="fdjgs-market-description", string=search_str).parent.parent
         teams_ps = ps_stats.find_all("li", class_="fdjgs-outcome")
         ps_info = []
         for team in teams_ps:
@@ -197,7 +185,7 @@ class MatchDetails:
         all_stats = match_soup.find('ul', class_="fdjgs-markets")
         v_team = self.visitor_teams[-1]
         h_team = self.home_teams[-1]
-        if self.sport == "Football":
+        if self.sport in ["Football", "Basketball"]:
             # get point spread info
             ps_dict = match_page.get_ps_info(all_stats, v_team, h_team)
             self.h_ps.append(ps_dict["h_ps"])
@@ -208,7 +196,7 @@ class MatchDetails:
             moneyline_dict = match_page.get_moneyline_info(all_stats)
             self.h_moneyline.append(moneyline_dict["h_moneyline"])
             self.v_moneyline.append(moneyline_dict["v_moneyline"])
-        if self.league == "NFL":
+        if self.league in ["NFL", "NCAA Basketball", "NBA"]:
             # get 3 way point spread info
             try:
                 ps_3way_dict = match_page.get_3way_info(all_stats, v_team, h_team, search_str="Point Spread 3-Way")
@@ -239,6 +227,26 @@ class MatchDetails:
             except:
                 self.runline_3way.append("NA")
                 self.runline_3way_po.append("NA")
+        elif self.sport == "Hockey":
+            # get point spread info
+            ps_dict = match_page.get_ps_info(all_stats, v_team, h_team, search_str="Puckline")
+            self.h_ps.append(ps_dict["h_ps"])
+            self.h_ps_po.append(ps_dict["h_ps_po"])
+            self.v_ps.append(ps_dict["v_ps"])
+            self.v_ps_po.append(ps_dict["v_ps_po"])
+            # get moneyline runline info
+            moneyline_dict = match_page.get_moneyline_info(all_stats)
+            self.h_moneyline.append(moneyline_dict["h_moneyline"])
+            self.v_moneyline.append(moneyline_dict["v_moneyline"])
+            # get 3 way point spread info
+            try:
+                ps_3way_dict = match_page.get_3way_info(all_stats, v_team, h_team, search_str="Puckline 3-Way")
+                self.ps_3way.append(ps_3way_dict['spread'])
+                self.ps_3way_po.append(ps_3way_dict['spread_po'])
+            except:
+                self.ps_3way.append("NA")
+                self.ps_3way_po.append("NA")
+                
         # close current match tab and return to home league page
         self.driver.close()
         self.driver.switch_to.window(self.driver.window_handles[0])
@@ -248,7 +256,7 @@ class MatchDetails:
         spread_po = []
         for i in range(len(self.visitor_teams)):
             # favourite team:  team having - sign in runline is favourite team
-            if self.sport == "Football":
+            if self.sport in ["Football", "Basketball", "Hockey"]:
                 tmp_h_spread = self.h_ps[i]
                 tmp_h_spread_po = self.h_ps_po[i]
                 tmp_v_spread = self.v_ps[i]
@@ -314,7 +322,7 @@ class MatchDetails:
                 "Visitor Team": self.visitor_teams,
                 "Home Team": self.home_teams
           }   
-        if self.league == 'NFL':
+        if self.league in ["NFL", "NCAA Basketball", "NBA", "NHL"]:
             tmp_match_info_dict = {
                     "V ML": self.v_moneyline,
                     "H ML": self.h_moneyline,
@@ -338,6 +346,16 @@ class MatchDetails:
                     "RL PO": spread_info['spread_po'],
                     "RL 3W": self.runline_3way,
                     "RL 3W PO": self.runline_3way_po,
+                }
+            match_info_dict.update(tmp_match_info_dict)
+        if self.league in ["NHL"]:
+            tmp_match_info_dict = {
+                    "V ML": self.v_moneyline,
+                    "H ML": self.h_moneyline,
+                    "PL": spread_info['spread'],
+                    "PL PO": spread_info['spread_po'],
+                    "PL 3W": self.ps_3way,
+                    "PL 3W PO": self.ps_3way_po
                 }
             match_info_dict.update(tmp_match_info_dict)
             
