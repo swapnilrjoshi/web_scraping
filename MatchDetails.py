@@ -168,7 +168,7 @@ class MatchDetails:
         self.v_runline_po = []
         self.runline_3way_po = []
 
-    def ps_info(self, all_stats, v_team, h_team, search_str):
+    def ps_info(self, match_page, all_stats, v_team, h_team, search_str):
         try:
             ps_dict = match_page.get_ps_info(all_stats, v_team, h_team, search_str=search_str)
             self.h_ps.append(ps_dict["h_ps"])
@@ -181,7 +181,7 @@ class MatchDetails:
             self.v_ps.append("NA")
             self.v_ps_po.append("NA")
             
-    def moneyline_info(self, all_stats):
+    def moneyline_info(self, match_page, all_stats):
         try:
             moneyline_dict = match_page.get_moneyline_info(all_stats)
             self.h_moneyline.append(moneyline_dict["h_moneyline"])
@@ -190,7 +190,7 @@ class MatchDetails:
             self.h_moneyline.append("NA")
             self.v_moneyline.append("NA")
             
-    def info_3way(self, all_stats, v_team, h_team, search_str="Point Spread 3-Way"):
+    def info_3way(self, match_page, all_stats, v_team, h_team, search_str="Point Spread 3-Way"):
         try:
             ps_3way_dict = match_page.get_3way_info(all_stats, v_team, h_team, search_str=search_str)
             self.ps_3way.append(ps_3way_dict['spread'])
@@ -218,12 +218,12 @@ class MatchDetails:
         h_team = self.home_teams[-1]
         if self.sport in ["Football", "Basketball"]:
             # get point spread info
-            self.ps_info(all_stats, v_team, h_team, search_str="Point Spread")
+            self.ps_info(match_page, all_stats, v_team, h_team, search_str="Point Spread")
             # get moneyline runline info
-            self.moneyline_info(all_stats)
+            self.moneyline_info(match_page, all_stats)
             # get 3 way point spread info
             if self.league in ["NFL", "NCAA Basketball", "NBA"]:
-                self.info_3way(all_stats, v_team, h_team, search_str="Point Spread 3-Way")
+                self.info_3way(match_page, all_stats, v_team, h_team, search_str="Point Spread 3-Way")
                 
         elif self.sport == "Baseball":
             # get runline info
@@ -249,11 +249,11 @@ class MatchDetails:
                 self.runline_3way_po.append("NA")
         elif self.sport == "Hockey":
             # get point spread info
-            self.ps_info(all_stats, v_team, h_team, search_str="Puckline")
+            self.ps_info(match_page, all_stats, v_team, h_team, search_str="Puckline")
             # get moneyline runline info
-            self.moneyline_info(all_stats)
+            self.moneyline_info(match_page, all_stats)
             # get 3 way point spread info
-            self.info_3way(all_stats, v_team, h_team, search_str="Puckline 3-Way")
+            self.info_3way(match_page, all_stats, v_team, h_team, search_str="Puckline 3-Way")
                 
         # close current match tab and return to home league page
         self.driver.close()
