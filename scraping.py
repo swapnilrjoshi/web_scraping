@@ -44,7 +44,7 @@ os.makedirs(os.path.dirname(filename), exist_ok=True)
 #sports = [("Baseball", "MLB", DRATING_MLB_URL), ("Football", "NFL", DRATING_NFL_URL), ("Football","NCAA Football", DRATING_NCAA_URL)]
 sports = [("Football", "NFL", DRATING_NFL_URL), ("Football","NCAA Football", DRATING_NCAA_URL), 
           ("Basketball","NCAA Basketball", DRATING_NCAA_B_URL), 
-          ("Basketball","NBA", DRATING_NBA_URL), ("Hockey", "NHL", DRATING_NHL_URL)]
+          ("Basketball","NBA", DRATING_NBA_URL), ("Hockey", "NHL", DRATING_NHL_URL),("Baseball", "MLB", DRATING_MLB_URL)]
 df_dict = {}
 #sports = [("Football", "NFL", DRATING_NFL_URL)]
 for i, league in enumerate(sports):

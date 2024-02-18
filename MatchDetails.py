@@ -36,7 +36,8 @@ class HomePage(DriverUtility):
         super().get_locator(By.ID, self.matches_menu_id)
         
     def get_team_names(self, match_info):
-        return match_info.find('div', class_=self.team_name_class).a.get_text(strip=True).split('@')
+#        return match_info.find('div', class_=self.team_name_class).a.get_text(strip=True).split('@')
+        return match_info.find('div', class_=self.team_name_class).a["title"].split('@')
     
     def get_match_link(self, match_info):
         return match_info.find('div', class_=self.match_link_class).a['href']
@@ -76,13 +77,13 @@ class MatchPage(DriverUtility):
         
     def get_moneyline_info(self, all_stats):
         moneyline_stats = all_stats.find("span", class_="fdjgs-market-description", string="Moneyline").parent.parent
-        teams_moneyline = moneyline_stats.find_all("li", class_="fdjgs-outcome")
+        teams_moneyline = moneyline_stats.find_all("li", class_="fdjgs-outcome-wrapper")
         moneyline_info = []
         for team in teams_moneyline:
             if team['data-hidden'] == 'true':
                 moneyline_info.append('NA')
             else:
-                wrapper = team.find("span", class_="fdjgs-outcome-wrapper")
+                wrapper = team.find("span", class_="fdjgs-outcome")
                 if 'suspended' in wrapper['aria-label']:
                     moneyline_info.append('suspended')
                 else:
@@ -95,13 +96,13 @@ class MatchPage(DriverUtility):
 
     def get_ps_info(self, all_stats, v_team, h_team, search_str="Point Spread"):
         ps_stats = all_stats.find("span", class_="fdjgs-market-description", string=search_str).parent.parent
-        teams_ps = ps_stats.find_all("li", class_="fdjgs-outcome")
+        teams_ps = ps_stats.find_all("li", class_="fdjgs-outcome-wrapper")
         ps_info = []
         for team in teams_ps:
             if team['data-hidden'] == 'true':
                 ps_info.append(tuple(('NA','NA')))
             else:
-                wrapper = team.find("span", class_="fdjgs-outcome-wrapper")
+                wrapper = team.find("span", class_="fdjgs-outcome")
                 if 'suspended' in wrapper['aria-label']:
                     ps_info.append(tuple(('suspended','suspended')))
                 else:
@@ -182,8 +183,9 @@ class MatchDetails:
             self.v_ps_po.append("NA")
             
     def moneyline_info(self, match_page, all_stats):
+        moneyline_dict = match_page.get_moneyline_info(all_stats)
         try:
-            moneyline_dict = match_page.get_moneyline_info(all_stats)
+#            moneyline_dict = match_page.get_moneyline_info(all_stats)
             self.h_moneyline.append(moneyline_dict["h_moneyline"])
             self.v_moneyline.append(moneyline_dict["v_moneyline"])
         except:
@@ -207,7 +209,7 @@ class MatchDetails:
         # switch to new tab and open match link
         self.driver.switch_to.window(self.driver.window_handles[-1])
         self.driver.get(match_link)
-        match_page.load_match_stats_page()
+        #match_page.load_match_stats_page()
         # get the html using BeautifulSoup
         if _sleep:
             time.sleep(15)
@@ -366,5 +368,4 @@ class MatchDetails:
                     "PL 3W PO": self.ps_3way_po
                 }
             match_info_dict.update(tmp_match_info_dict)
-            
         return match_info_dict
